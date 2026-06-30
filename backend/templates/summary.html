@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>ATS Resume Analysis Summary</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 20mm;
+            @bottom-right {
+                content: "Page 1 of 4";
+                font-family: Arial, sans-serif;
+                font-size: 9pt;
+                color: #64748b;
+            }
+        }
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            color: #1e293b;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+        }
+        .header {
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 15px;
+            margin-bottom: 25px;
+        }
+        .header h1 {
+            font-size: 24pt;
+            color: #0f172a;
+            margin: 0 0 5px 0;
+        }
+        .header .meta {
+            font-size: 10pt;
+            color: #64748b;
+        }
+        .score-container {
+            display: flex;
+            align-items: center;
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        .score-circle {
+            min-width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            background-color: {{ score_color }};
+            color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            font-size: 24pt;
+            margin-right: 25px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+        }
+        .score-circle span {
+            font-size: 10pt;
+            font-weight: normal;
+            opacity: 0.9;
+        }
+        .score-explanation h2 {
+            margin: 0 0 8px 0;
+            color: #1e293b;
+            font-size: 16pt;
+        }
+        .score-explanation p {
+            margin: 0;
+            color: #475569;
+            font-size: 11pt;
+        }
+        .section-title {
+            font-size: 14pt;
+            color: #0f172a;
+            border-left: 4px solid #3b82f6;
+            padding-left: 10px;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .progress-bar-container {
+            margin-bottom: 15px;
+        }
+        .progress-bar-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 10.5pt;
+            font-weight: 600;
+            color: #334155;
+            margin-bottom: 5px;
+        }
+        .progress-bar-bg {
+            background-color: #f1f5f9;
+            height: 10px;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            border-radius: 5px;
+            background-color: #3b82f6;
+        }
+        .strengths-list {
+            margin: 0;
+            padding-left: 20px;
+        }
+        .strengths-list li {
+            margin-bottom: 8px;
+            color: #334155;
+            font-size: 11pt;
+        }
+        .priority-box {
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            font-size: 10.5pt;
+        }
+        .priority-high {
+            background-color: #fef2f2;
+            border: 1px solid #fca5a5;
+            color: #991b1b;
+        }
+        .priority-medium {
+            background-color: #fffbeb;
+            border: 1px solid #fde047;
+            color: #92400e;
+        }
+        .priority-low {
+            background-color: #f0fdf4;
+            border: 1px solid #86efac;
+            color: #166534;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>ATS Resume Analysis</h1>
+        <div class="meta">Generated on {{ timestamp|format_date }}</div>
+    </div>
+
+    <div class="score-container">
+        <div class="score-circle">
+            {{ overall_score|round|int }}
+            <span>/100</span>
+        </div>
+        <div class="score-explanation">
+            <h2>Overall Score</h2>
+            <p>{{ interpretation }}</p>
+        </div>
+    </div>
+
+    <h2 class="section-title">Component Breakdown</h2>
+    <div style="margin-bottom: 35px;">
+        <div class="progress-bar-container">
+            <div class="progress-bar-label">
+                <span>Formatting & Layout</span>
+                <span>{{ component_scores.formatting }} / 20 ({{ component_pct.formatting }}%)</span>
+            </div>
+            <div class="progress-bar-bg">
+                <div class="progress-bar-fill" style="width: {{ component_pct.formatting }}%; background-color: #10b981;"></div>
+            </div>
+        </div>
+        <div class="progress-bar-container">
+            <div class="progress-bar-label">
+                <span>Keywords Matching</span>
+                <span>{{ component_scores.keywords }} / 25 ({{ component_pct.keywords }}%)</span>
+            </div>
+            <div class="progress-bar-bg">
+                <div class="progress-bar-fill" style="width: {{ component_pct.keywords }}%; background-color: #3b82f6;"></div>
+            </div>
+        </div>
+        <div class="progress-bar-container">
+            <div class="progress-bar-label">
+                <span>Content Quality</span>
+                <span>{{ component_scores.content }} / 25 ({{ component_pct.content }}%)</span>
+            </div>
+            <div class="progress-bar-bg">
+                <div class="progress-bar-fill" style="width: {{ component_pct.content }}%; background-color: #8b5cf6;"></div>
+            </div>
+        </div>
+        <div class="progress-bar-container">
+            <div class="progress-bar-label">
+                <span>Skill Validation</span>
+                <span>{{ component_scores.skill_validation }} / 15 ({{ component_pct.skill_validation }}%)</span>
+            </div>
+            <div class="progress-bar-bg">
+                <div class="progress-bar-fill" style="width: {{ component_pct.skill_validation }}%; background-color: #f59e0b;"></div>
+            </div>
+        </div>
+        <div class="progress-bar-container">
+            <div class="progress-bar-label">
+                <span>ATS Compatibility</span>
+                <span>{{ component_scores.ats_compatibility }} / 15 ({{ component_pct.ats_compatibility }}%)</span>
+            </div>
+            <div class="progress-bar-bg">
+                <div class="progress-bar-fill" style="width: {{ component_pct.ats_compatibility }}%; background-color: #ec4899;"></div>
+            </div>
+        </div>
+    </div>
+
+    {% if strengths %}
+    <h2 class="section-title">Key Strengths</h2>
+    <ul class="strengths-list" style="margin-bottom: 35px;">
+        {% for strength in strengths %}
+        <li><strong>{{ strength }}</strong></li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+
+    <h2 class="section-title">Action Items Summary</h2>
+    <div>
+        {% if high_priority %}
+        <div class="priority-box priority-high">
+            <strong>High Priority Issues ({{ high_priority|length }}):</strong> Critical formatting, structure, or content problems that directly impact parser readability.
+        </div>
+        {% endif %}
+        {% if medium_priority %}
+        <div class="priority-box priority-medium">
+            <strong>Medium Priority Issues ({{ medium_priority|length }}):</strong> Areas where content metrics, description depth, or validation could be improved.
+        </div>
+        {% endif %}
+        {% if low_priority %}
+        <div class="priority-box priority-low">
+            <strong>Low Priority Issues ({{ low_priority|length }}):</strong> Optional layout tweaks or grammar check suggestions.
+        </div>
+        {% endif %}
+        {% if not high_priority and not medium_priority and not low_priority %}
+        <div class="priority-box priority-low">
+            <strong>No issues detected!</strong> Your resume is in excellent shape.
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>

@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Job Description Match Analysis</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 20mm;
+            @bottom-right {
+                content: "Page 4 of 4";
+                font-family: Arial, sans-serif;
+                font-size: 9pt;
+                color: #64748b;
+            }
+        }
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            color: #1e293b;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+        }
+        .header {
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 15px;
+            margin-bottom: 25px;
+        }
+        .header h1 {
+            font-size: 20pt;
+            color: #0f172a;
+            margin: 0 0 5px 0;
+        }
+        .header .meta {
+            font-size: 10pt;
+            color: #64748b;
+        }
+        .match-card {
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+        }
+        .match-score {
+            font-size: 32pt;
+            font-weight: bold;
+            color: #10b981;
+            margin-right: 25px;
+        }
+        .match-details h2 {
+            margin: 0 0 4px 0;
+            font-size: 14pt;
+            color: #1e293b;
+        }
+        .match-details p {
+            margin: 0;
+            color: #64748b;
+            font-size: 10pt;
+        }
+        .section-title {
+            font-size: 13pt;
+            color: #0f172a;
+            border-left: 4px solid #10b981;
+            padding-left: 10px;
+            margin-top: 25px;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .keywords-container {
+            margin-bottom: 20px;
+        }
+        .keyword-pill {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 9.5pt;
+            margin-right: 6px;
+            margin-bottom: 6px;
+            font-weight: 500;
+        }
+        .keyword-matched {
+            background-color: #ecfdf5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+        }
+        .keyword-missing {
+            background-color: #fff1f2;
+            color: #9f1239;
+            border: 1px solid #fecdd3;
+        }
+        .skill-gap-list {
+            padding-left: 20px;
+            margin: 0;
+        }
+        .skill-gap-list li {
+            font-size: 10.5pt;
+            color: #334155;
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Job Description Target Match</h1>
+        <div class="meta">Analysis of resume compatibility against the provided job description</div>
+    </div>
+
+    {% if jd_analysis %}
+    <div class="match-card">
+        <div class="match-score">{{ jd_analysis.match_percentage|round|int }}%</div>
+        <div class="match-details">
+            <h2>Match Rate</h2>
+            <p>Semantic Similarity: {{ (jd_analysis.semantic_similarity * 100)|round|int }}%</p>
+        </div>
+    </div>
+
+    <h2 class="section-title">Matched Keywords ({{ jd_analysis.matched_keywords|length }})</h2>
+    <div class="keywords-container">
+        {% if jd_analysis.matched_keywords %}
+            {% for kw in jd_analysis.matched_keywords %}
+            <span class="keyword-pill keyword-matched">{{ kw }}</span>
+            {% endfor %}
+        {% else %}
+            <p style="color: #64748b; font-style: italic; font-size: 10.5pt;">No keywords from the JD were matched in your resume.</p>
+        {% endif %}
+    </div>
+
+    <h2 class="section-title">Missing Keywords ({{ jd_analysis.missing_keywords|length }})</h2>
+    <p style="color: #64748b; font-size: 9.5pt; margin-top: -5px; margin-bottom: 12px;">
+        These high-priority keywords were found in the job description but are absent or poorly matches on your resume. Consider incorporating them naturally.
+    </p>
+    <div class="keywords-container">
+        {% if jd_analysis.missing_keywords %}
+            {% for kw in jd_analysis.missing_keywords %}
+            <span class="keyword-pill keyword-missing">{{ kw }}</span>
+            {% endfor %}
+        {% else %}
+            <p style="color: #64748b; font-style: italic; font-size: 10.5pt;">Great job! You have matched all primary keywords.</p>
+        {% endif %}
+    </div>
+
+    <h2 class="section-title">Skills Gap Analysis</h2>
+    <p style="color: #64748b; font-size: 9.5pt; margin-top: -5px; margin-bottom: 12px;">
+        Core competencies, products, or methodologies highlighted in the job description that were not matched on your resume:
+    </p>
+    {% if jd_analysis.skills_gap %}
+        <ul class="skill-gap-list">
+            {% for skill in jd_analysis.skills_gap %}
+            <li><strong>{{ skill }}</strong> — Missing context or usage example in your profile descriptions.</li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p style="color: #64748b; font-style: italic; font-size: 10.5pt;">No significant skills gap identified. Your profile aligns well with the requirements.</p>
+    {% endif %}
+
+    {% else %}
+    <div class="match-card" style="background-color: #f1f5f9; border-color: #cbd5e1;">
+        <div class="match-details" style="margin-left: 0;">
+            <h2>No Job Description Provided</h2>
+            <p style="color: #475569; margin-top: 5px;">
+                JD Comparison was not requested for this analysis. To compare your resume against a specific target role, select "Job Description Comparison" mode and paste the job description before running the scoring analysis.
+            </p>
+        </div>
+    </div>
+    {% endif %}
+</body>
+</html>

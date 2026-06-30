@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Skill Validation Report</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 20mm;
+            @bottom-right {
+                content: "Page 2 of 4";
+                font-family: Arial, sans-serif;
+                font-size: 9pt;
+                color: #64748b;
+            }
+        }
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            color: #1e293b;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+        }
+        .header {
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 15px;
+            margin-bottom: 25px;
+        }
+        .header h1 {
+            font-size: 20pt;
+            color: #0f172a;
+            margin: 0 0 5px 0;
+        }
+        .header .meta {
+            font-size: 10pt;
+            color: #64748b;
+        }
+        .validation-card {
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        .validation-score {
+            font-size: 28pt;
+            font-weight: bold;
+            color: #3b82f6;
+            margin-bottom: 5px;
+        }
+        .validation-label {
+            font-size: 11pt;
+            color: #475569;
+            font-weight: 600;
+        }
+        .section-title {
+            font-size: 14pt;
+            color: #0f172a;
+            border-left: 4px solid #3b82f6;
+            padding-left: 10px;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .skill-grid {
+            margin-bottom: 20px;
+        }
+        .skill-item {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 12px 15px;
+            margin-bottom: 10px;
+        }
+        .skill-name {
+            font-size: 11pt;
+            font-weight: bold;
+            color: #1e293b;
+            margin-bottom: 4px;
+        }
+        .project-tags {
+            font-size: 9.5pt;
+            color: #64748b;
+        }
+        .project-tag {
+            background-color: #eff6ff;
+            color: #1e40af;
+            border: 1px solid #bfdbfe;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-right: 5px;
+            display: inline-block;
+            margin-top: 4px;
+        }
+        .unvalidated-container {
+            display: flex;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+        .unvalidated-pill {
+            background-color: #f1f5f9;
+            border: 1px solid #cbd5e1;
+            color: #475569;
+            padding: 4px 10px;
+            border-radius: 15px;
+            margin-right: 8px;
+            margin-bottom: 8px;
+            font-size: 10pt;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Skill Validation Analysis</h1>
+        <div class="meta">Validation of listed technical capabilities through project mappings</div>
+    </div>
+
+    <div class="validation-card">
+        <div class="validation-score">{{ (validation_pct * 100)|round|int }}%</div>
+        <div class="validation-label">Skills Validated by Project Context</div>
+        <p style="margin: 8px 0 0 0; color: #64748b; font-size: 10pt;">
+            We cross-reference the technical skills listed on your resume against the descriptions of your work experience and projects. Skills are "validated" when they are actively described in context rather than just listed in a list.
+        </p>
+    </div>
+
+    <h2 class="section-title">Validated Skills ({{ validated_count }} of {{ total_skills }})</h2>
+    <div class="skill-grid">
+        {% if validated_skills %}
+            {% for vs in validated_skills %}
+            <div class="skill-item">
+                <div class="skill-name">✓ {{ vs.skill }}</div>
+                {% if vs.projects %}
+                <div class="project-tags">
+                    Mapped context: 
+                    {% for proj in vs.projects %}
+                    <span class="project-tag">{{ proj }}</span>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="project-tags" style="font-style: italic;">Mapped to general experience context</div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        {% else %}
+            <p style="color: #64748b; font-style: italic; font-size: 11pt;">No skills could be validated. Make sure to describe the technologies you used in your work experience bullet points.</p>
+        {% endif %}
+    </div>
+
+    {% if unvalidated_skills %}
+    <h2 class="section-title">Unvalidated Skills ({{ unvalidated_skills|length }})</h2>
+    <p style="color: #64748b; font-size: 10pt; margin-bottom: 15px;">
+        These skills are listed on your resume (e.g. in a Skills section), but are not mentioned in the descriptions of your work history or projects. ATS systems and recruiters value skills with active context.
+    </p>
+    <div class="unvalidated-container">
+        {% for us in unvalidated_skills %}
+        <span class="unvalidated-pill">{{ us }}</span>
+        {% endfor %}
+    </div>
+    {% endif %}
+</body>
+</html>
