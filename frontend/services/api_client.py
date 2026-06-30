@@ -8,8 +8,13 @@ DEFAULT_BACKEND_URL = "http://localhost:8000"
 
 
 def _backend_url() -> str:
+    import os
+
+    env_url = os.getenv("BACKEND_URL", "").strip()
+    if env_url:
+        return env_url.rstrip("/")
     try:
-        return st.secrets["backend"]["url"]
+        return str(st.secrets["backend"]["url"]).rstrip("/")
     except (KeyError, FileNotFoundError):
         return DEFAULT_BACKEND_URL
 

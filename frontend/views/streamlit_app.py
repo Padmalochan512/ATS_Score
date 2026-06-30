@@ -1,11 +1,14 @@
-import streamlit as st
 import sys
 from pathlib import Path
 
-# Put the repo root on sys.path so `from frontend.views import ...` resolves
-# regardless of the directory streamlit was launched from.
-sys.path.insert(0, str(Path(__file__).parent.parent))
+import streamlit as st
 
+# Project root (ats_score)
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+FRONTEND_ROOT = Path(__file__).resolve().parents[1]
+
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
 # Configure page
 st.set_page_config(
     page_title="ATS Resume Scorer",
@@ -50,7 +53,7 @@ if (
 #Load custom CSS
 def load_css():
     try:
-        css_path = Path(__file__).parent / 'assets' / 'styles.css'
+        css_path = FRONTEND_ROOT / 'assets' / 'styles.css'
         with open(css_path, 'r') as f:
             return f'<style>{f.read()}</style>'
     except FileNotFoundError:

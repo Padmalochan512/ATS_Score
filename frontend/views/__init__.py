@@ -1,5 +1,7 @@
-"""Views package for single-page app architecture"""
+"""Views package for the Streamlit single-page app.
 
-from . import landing, scorer, history, resources
+Submodules are imported lazily by the main app so one page does not force the
+entire frontend to load at package import time.
+"""
 
-__all__ = ['landing', 'scorer', 'history', 'resources']
+__all__ = ["landing", "scorer", "history", "resources"]

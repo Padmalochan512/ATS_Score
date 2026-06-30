@@ -20,3 +20,81 @@
 2026-06-30 09:00:52,943 - INFO - Loaded all-MiniLM-L6-v2
 2026-06-30 09:00:52,946 - INFO - All models loaded. API is ready to serve requests.
 2026-06-30 09:09:10,113 - INFO - shutting down the api!!
+2026-06-30 09:13:37,148 - INFO - Loading spaCy NLP model: en_core_web_md
+2026-06-30 09:13:39,683 - INFO - Loaded en_core_web_md
+2026-06-30 09:13:39,683 - INFO - Loading SentenceTransformer: all-MiniLM-L6-v2
+2026-06-30 09:13:53,404 - INFO - Loaded all-MiniLM-L6-v2
+2026-06-30 09:13:53,404 - INFO - All models loaded. API is ready to serve requests.
+2026-06-30 09:17:38,194 - INFO - shutting down the api!!
+2026-06-30 09:17:38,194 - INFO - shutting down the api!!
+2026-06-30 09:17:38,226 - INFO - shutting down the api!!
+2026-06-30 09:17:38,859 - INFO - Loading spaCy NLP model: en_core_web_md
+2026-06-30 09:17:38,859 - INFO - Loading spaCy NLP model: en_core_web_md
+2026-06-30 09:17:38,893 - INFO - Loading spaCy NLP model: en_core_web_md
+2026-06-30 09:17:41,904 - INFO - Loaded en_core_web_md
+2026-06-30 09:17:41,904 - INFO - Loading SentenceTransformer: all-MiniLM-L6-v2
+2026-06-30 09:17:41,904 - INFO - Loaded en_core_web_md
+2026-06-30 09:17:41,904 - INFO - Loading SentenceTransformer: all-MiniLM-L6-v2
+2026-06-30 09:17:41,910 - INFO - Loaded en_core_web_md
+2026-06-30 09:17:41,910 - INFO - Loading SentenceTransformer: all-MiniLM-L6-v2
+2026-06-30 09:17:57,421 - INFO - Loaded all-MiniLM-L6-v2
+2026-06-30 09:17:57,421 - INFO - Loaded all-MiniLM-L6-v2
+2026-06-30 09:17:57,470 - INFO - All models loaded. API is ready to serve requests.
+2026-06-30 09:17:57,469 - INFO - All models loaded. API is ready to serve requests.
+2026-06-30 09:17:57,785 - INFO - Loaded all-MiniLM-L6-v2
+2026-06-30 09:17:57,798 - INFO - All models loaded. API is ready to serve requests.
+2026-06-30 09:29:29,861 - INFO - shutting down the api!!
+2026-06-30 09:29:29,930 - INFO - shutting down the api!!
+2026-06-30 09:29:29,934 - INFO - shutting down the api!!
+2026-06-30 09:29:30,384 - INFO - Loading spaCy NLP model: en_core_web_md
+2026-06-30 09:29:30,385 - INFO - Loading spaCy NLP model: en_core_web_md
+2026-06-30 09:29:30,420 - INFO - Loading spaCy NLP model: en_core_web_md
+2026-06-30 09:29:33,473 - INFO - Loaded en_core_web_md
+2026-06-30 09:29:33,473 - INFO - Loading SentenceTransformer: all-MiniLM-L6-v2
+2026-06-30 09:29:33,474 - INFO - Loaded en_core_web_md
+2026-06-30 09:29:33,474 - INFO - Loading SentenceTransformer: all-MiniLM-L6-v2
+2026-06-30 09:29:33,474 - INFO - Loaded en_core_web_md
+2026-06-30 09:29:33,474 - INFO - Loading SentenceTransformer: all-MiniLM-L6-v2
+2026-06-30 09:29:49,813 - INFO - Loaded all-MiniLM-L6-v2
+2026-06-30 09:29:49,813 - INFO - Loaded all-MiniLM-L6-v2
+2026-06-30 09:29:49,912 - INFO - Loaded all-MiniLM-L6-v2
+2026-06-30 09:29:49,871 - INFO - All models loaded. API is ready to serve requests.
+2026-06-30 09:29:49,871 - INFO - All models loaded. API is ready to serve requests.
+2026-06-30 09:29:49,923 - INFO - All models loaded. API is ready to serve requests.
+2026-06-30 09:30:11,604 - INFO - shutting down the api!!
+2026-06-30 09:30:11,605 - INFO - shutting down the api!!
+2026-06-30 09:30:11,612 - INFO - shutting down the api!!
+2026-06-30 09:30:12,249 - INFO - Loading spaCy NLP model: en_core_web_md
+2026-06-30 09:30:12,249 - INFO - Loading spaCy NLP model: en_core_web_md
+2026-06-30 09:30:12,282 - INFO - Loading spaCy NLP model: en_core_web_md
+2026-06-30 09:30:15,329 - INFO - Loaded en_core_web_md
+2026-06-30 09:30:15,329 - INFO - Loading SentenceTransformer: all-MiniLM-L6-v2
+2026-06-30 09:30:15,330 - INFO - Loaded en_core_web_md
+2026-06-30 09:30:15,330 - INFO - Loading SentenceTransformer: all-MiniLM-L6-v2
+2026-06-30 09:30:15,341 - INFO - Loaded en_core_web_md
+2026-06-30 09:30:15,341 - INFO - Loading SentenceTransformer: all-MiniLM-L6-v2
+2026-06-30 09:30:30,049 - INFO - Loaded all-MiniLM-L6-v2
+2026-06-30 09:30:30,049 - INFO - Loaded all-MiniLM-L6-v2
+2026-06-30 09:30:30,049 - INFO - Loaded all-MiniLM-L6-v2
+2026-06-30 09:30:30,054 - INFO - All models loaded. API is ready to serve requests.
+2026-06-30 09:30:30,054 - INFO - All models loaded. API is ready to serve requests.
+2026-06-30 09:30:30,054 - INFO - All models loaded. API is ready to serve requests.
+2026-06-30 09:37:36,237 - INFO - shutting down the api!!
+2026-06-30 09:37:36,237 - INFO - shutting down the api!!
+2026-06-30 09:37:36,238 - INFO - shutting down the api!!
+2026-06-30 09:37:36,974 - INFO - Loading spaCy NLP model: en_core_web_md
+2026-06-30 09:37:36,975 - INFO - Loading spaCy NLP model: en_core_web_md
+2026-06-30 09:37:37,012 - INFO - Loading spaCy NLP model: en_core_web_md
+2026-06-30 09:37:39,978 - INFO - Loaded en_core_web_md
+2026-06-30 09:37:39,978 - INFO - Loading SentenceTransformer: all-MiniLM-L6-v2
+2026-06-30 09:37:39,979 - INFO - Loaded en_core_web_md
+2026-06-30 09:37:39,979 - INFO - Loading SentenceTransformer: all-MiniLM-L6-v2
+2026-06-30 09:37:39,981 - INFO - Loaded en_core_web_md
+2026-06-30 09:37:39,981 - INFO - Loading SentenceTransformer: all-MiniLM-L6-v2
+2026-06-30 09:37:57,176 - INFO - Loaded all-MiniLM-L6-v2
+2026-06-30 09:37:57,156 - INFO - Loaded all-MiniLM-L6-v2
+2026-06-30 09:37:57,156 - INFO - Loaded all-MiniLM-L6-v2
+2026-06-30 09:37:57,183 - INFO - All models loaded. API is ready to serve requests.
+2026-06-30 09:37:57,183 - INFO - All models loaded. API is ready to serve requests.
+2026-06-30 09:37:57,183 - INFO - All models loaded. API is ready to serve requests.
+2026-06-30 09:39:30,932 - INFO - shutting down the api!!
