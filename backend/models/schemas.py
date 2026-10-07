@@ -1,5 +1,5 @@
 from typing import Any, Dict, List, Optional
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 class ComponentScores(BaseModel):
     formatting: float
@@ -16,8 +16,8 @@ class JDComparison(BaseModel):
     skills_gap: List[str]
 
 class SkillValidationDetails(BaseModel):
-    validated: List[Dict[str, Any]] = []       # [{'skill': str, 'projects': [str]}]
-    unvalidated: List[str] = []                # ['Flask', 'A/B Testing', ...]
+    validated: List[Dict[str, Any]] = Field(default_factory=list)       # [{'skill': str, 'projects': [str]}]
+    unvalidated: List[str] = Field(default_factory=list)                # ['Flask', 'A/B Testing', ...]
     total: int = 0
     validated_count: int = 0
     validation_pct: float = 0.0
@@ -42,12 +42,40 @@ class AnalysisResponse(BaseModel):
 
     ats_score: float
     keyword_match: float = 0.0
-    missing_keywords: List[str] = []
-    matched_keywords: List[str] = []
-    suggestions: List[str] = []
-    strengths: List[str] = []
-    critical_issues: List[str] = []
-    skills: List[str] = []
+    missing_keywords: List[str] = Field(default_factory=list)
+    matched_keywords: List[str] = Field(default_factory=list)
+    suggestions: List[str] = Field(default_factory=list)
+    strengths: List[str] = Field(default_factory=list)
+    critical_issues: List[str] = Field(default_factory=list)
+    skills: List[str] = Field(default_factory=list)
     jd_comparison: Optional[JDComparison] = None
-    warnings: List[str] = []
+    warnings: List[str] = Field(default_factory=list)
     interpretation: str = ""
+
+
+class LoginEvent(BaseModel):
+    id: Optional[str] = None
+    user_id: str
+    email: str = ""
+    provider: str = ""
+    event_type: str = "login"
+    created_at: str = ""
+    metadata: Dict[str, Any] = Field(default_factory=dict)
+
+
+class OwnerAnalysisRecord(BaseModel):
+    id: Optional[str] = None
+    user_id: str
+    user_email: str = ""
+    filename: str = ""
+    ats_score: float = 0.0
+    keyword_match: float = 0.0
+    created_at: str = ""
+    resume_text: str = ""
+    job_description: str = ""
+    analysis_result: Dict[str, Any] = Field(default_factory=dict)
+
+
+class OwnerDashboardResponse(BaseModel):
+    login_events: List[LoginEvent] = Field(default_factory=list)
+    analyses: List[OwnerAnalysisRecord] = Field(default_factory=list)

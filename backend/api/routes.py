@@ -3,8 +3,16 @@ from typing import List, Optional
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, UploadFile
 
-from backend.api.auth import get_current_user
-from backend.models.schemas import AnalysisResponse, ComponentScores, JDComparison, SkillValidationDetails
+from backend.api.auth import get_current_user, get_current_user_context, require_owner
+from backend.models.schemas import (
+    AnalysisResponse,
+    ComponentScores,
+    JDComparison,
+    OwnerDashboardResponse,
+    SkillValidationDetails,
+    LoginEvent,
+    OwnerAnalysisRecord,
+)
 from backend.utils.file_utils import (
     get_default_grammar_results,
     get_default_location_results,
@@ -25,7 +33,7 @@ async def analyze_resume(
     request: Request,
     resume: UploadFile = File(..., description='Resume file — PDF or DOCX, max 5 MB'),
     job_description: str = Form('', description='Job description text (optional)'),
-    user_id: str = Depends(get_current_user),
+    user = Depends(get_current_user_context),
 ):
     warnings: List[str] = []
 
@@ -115,7 +123,14 @@ async def analyze_resume(
 
     try:
         from backend.database.supabase_db import save_analysis
-        await save_analysis(user_id, filename, result)
+        await save_analysis(
+            user.user_id,
+            filename,
+            result,
+            resume_text=resume_text,
+            job_description=job_description,
+            user_email=user.email,
+        )
     except Exception as exc:
         logger.warning(f'History save failed (non-blocking): {exc}')
 
@@ -126,8 +141,8 @@ async def health_check(request: Request):
     """Health check — confirms models are loaded and the API is ready."""
     return {
         'status':          'healthy',
-        'nlp_loaded':      request.app.state.nlp is not None,
-        'embedder_loaded': request.app.state.embedder is not None,
+        'nlp_loaded':      getattr(request.app.state, 'nlp', None) is not None,
+        'embedder_loaded': getattr(request.app.state, 'embedder', None) is not None,
     }
 
 @router.get('/history')
@@ -139,6 +154,89 @@ async def get_history(user_id: str = Depends(get_current_user)):
     except Exception as exc:
         logger.error(f'History fetch failed: {exc}')
         raise HTTPException(status_code=500, detail=f'Could not load history: {exc}')
+
+
+@router.post('/auth/login-event')
+async def record_login_event(user = Depends(get_current_user_context)):
+    """Record a successful login for the owner dashboard."""
+    from backend.database.supabase_db import log_login_event
+
+    if user.is_mock:
+        return {'status': 'skipped', 'reason': 'mock-user'}
+
+    try:
+        event_id = await log_login_event(
+            user.user_id,
+            email=user.email,
+            provider=user.provider,
+            event_type='login',
+        )
+        return {'status': 'recorded', 'id': event_id}
+    except Exception as exc:
+        logger.warning(f'Login event save failed (non-blocking): {exc}')
+        return {'status': 'failed', 'detail': str(exc)}
+
+
+@router.get('/admin/dashboard', response_model=OwnerDashboardResponse)
+async def get_admin_dashboard(owner = Depends(require_owner)):
+    """Owner-only dashboard data: recent logins and saved resume analyses."""
+    from backend.database.supabase_db import get_all_history, get_login_events
+
+    login_rows = await get_login_events(limit=100)
+    analysis_rows = await get_all_history(limit=100)
+
+    login_events = [LoginEvent(**row) for row in login_rows]
+    analyses = []
+    for row in analysis_rows:
+        analyses.append(
+            OwnerAnalysisRecord(
+                id=str(row.get('id')) if row.get('id') is not None else None,
+                user_id=row.get('user_id', ''),
+                user_email=row.get('user_email', ''),
+                filename=row.get('filename', ''),
+                ats_score=float(row.get('ats_score', 0) or 0),
+                keyword_match=float(row.get('keyword_match', 0) or 0),
+                created_at=row.get('created_at', ''),
+                resume_text=row.get('resume_text', ''),
+                job_description=row.get('job_description', ''),
+                analysis_result=row.get('analysis_result', {}),
+            )
+        )
+
+    return OwnerDashboardResponse(
+        login_events=login_events,
+        analyses=analyses,
+    )
+
+
+@router.get('/admin/login-events', response_model=list[LoginEvent])
+async def get_admin_login_events(owner = Depends(require_owner)):
+    from backend.database.supabase_db import get_login_events
+
+    rows = await get_login_events(limit=100)
+    return [LoginEvent(**row) for row in rows]
+
+
+@router.get('/admin/analyses', response_model=list[OwnerAnalysisRecord])
+async def get_admin_analyses(owner = Depends(require_owner)):
+    from backend.database.supabase_db import get_all_history
+
+    rows = await get_all_history(limit=100)
+    return [
+        OwnerAnalysisRecord(
+            id=str(row.get('id')) if row.get('id') is not None else None,
+            user_id=row.get('user_id', ''),
+            user_email=row.get('user_email', ''),
+            filename=row.get('filename', ''),
+            ats_score=float(row.get('ats_score', 0) or 0),
+            keyword_match=float(row.get('keyword_match', 0) or 0),
+            created_at=row.get('created_at', ''),
+            resume_text=row.get('resume_text', ''),
+            job_description=row.get('job_description', ''),
+            analysis_result=row.get('analysis_result', {}),
+        )
+        for row in rows
+    ]
 
 
 @router.delete('/history/{analysis_id}')

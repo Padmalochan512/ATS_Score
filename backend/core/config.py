@@ -17,7 +17,11 @@ APP_VERSION='1.0.0'
 APP_DESCRIPTION='analyse resumes against job description using nlp + ml'
 
 ALLOWED_ORIGINS = [
-    'https://appapppy-ktwxupi73vqhjzweksze9d.streamlit.app/'
+    'https://appapppy-ktwxupi73vqhjzweksze9d.streamlit.app',
+    'http://localhost:8501',
+    'http://127.0.0.1:8501',
+    'http://localhost:8000',
+    '*',
 ]
 
 #file
@@ -51,3 +55,15 @@ SUPABASE_KEY       = os.getenv('SUPABASE_KEY', '')          # service_role — D
 SUPABASE_ANON_KEY  = os.getenv('SUPABASE_ANON_KEY', '')     # public anon — frontend auth calls
 SUPABASE_JWT_SECRET= os.getenv('SUPABASE_JWT_SECRET', '')   # used by backend to verify access tokens
 GROQ_API_KEY       = os.getenv('GROQ_API_KEY', '')
+
+# Owner / admin access for the dashboard.
+OWNER_EMAIL        = os.getenv('OWNER_EMAIL', '').strip().lower()
+OWNER_EMAILS       = {
+    email.strip().lower()
+    for email in os.getenv('OWNER_EMAILS', '').split(',')
+    if email.strip()
+}
+if OWNER_EMAIL:
+    OWNER_EMAILS.add(OWNER_EMAIL)
+
+ENABLE_MOCK_AUTH   = os.getenv('ENABLE_MOCK_AUTH', 'true').lower() in {'1', 'true', 'yes', 'on'}

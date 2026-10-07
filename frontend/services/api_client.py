@@ -2,9 +2,18 @@ from typing import Any, Dict, List
 
 import requests
 import streamlit as st
+from pathlib import Path
 
 
 DEFAULT_BACKEND_URL = "http://localhost:8000"
+
+
+def _secrets_file_exists() -> bool:
+    candidates = [
+        Path.home() / ".streamlit" / "secrets.toml",
+        Path(__file__).resolve().parents[2] / ".streamlit" / "secrets.toml",
+    ]
+    return any(path.exists() for path in candidates)
 
 
 def _backend_url() -> str:
@@ -13,9 +22,11 @@ def _backend_url() -> str:
     env_url = os.getenv("BACKEND_URL", "").strip()
     if env_url:
         return env_url.rstrip("/")
+    if not _secrets_file_exists():
+        return DEFAULT_BACKEND_URL
     try:
         return str(st.secrets["backend"]["url"]).rstrip("/")
-    except (KeyError, FileNotFoundError):
+    except (KeyError, FileNotFoundError, AttributeError):
         return DEFAULT_BACKEND_URL
 
 
@@ -87,3 +98,23 @@ def get_history_pdf(analysis_id: str, access_token: str) -> bytes:
     )
     response.raise_for_status()
     return response.content
+
+
+def record_login_event(access_token: str) -> Dict[str, Any]:
+    response = requests.post(
+        f"{_backend_url()}/api/v1/auth/login-event",
+        headers=_auth_headers(access_token),
+        timeout=30,
+    )
+    response.raise_for_status()
+    return response.json()
+
+
+def get_owner_dashboard(access_token: str) -> Dict[str, Any]:
+    response = requests.get(
+        f"{_backend_url()}/api/v1/admin/dashboard",
+        headers=_auth_headers(access_token),
+        timeout=60,
+    )
+    response.raise_for_status()
+    return response.json()

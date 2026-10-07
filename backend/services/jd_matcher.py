@@ -49,10 +49,14 @@ def analyze_skills_gap(
         if ent.label_ in ['PRODUCT', 'ORG', 'LANGUAGE']:
             jd_skills.add(ent.text.lower())
 
-    for chunk in doc.noun_chunks:
-        ct = chunk.text.lower().strip()
-        if 1 <= len(ct.split()) <= 4:
-            jd_skills.add(ct)
+    try:
+        for chunk in doc.noun_chunks:
+            ct = chunk.text.lower().strip()
+            if 1 <= len(ct.split()) <= 4:
+                jd_skills.add(ct)
+    except Exception:
+        # Some lightweight or blank spaCy pipelines do not provide noun chunks.
+        pass
 
     # Normalize resume skills for comparison
     resume_normalized = {normalize_skill(s) for s in resume_skills}

@@ -2,7 +2,9 @@ import os
 import logging
 from pathlib import Path
 from typing import Any, Dict
+from uuid import uuid5, NAMESPACE_URL
 import streamlit as st
+import jwt
 from supabase import Client, create_client
 
 logger = logging.getLogger('ats_resume_scorer')
@@ -15,11 +17,21 @@ except ImportError:
     pass
 
 
+def _secrets_file_exists() -> bool:
+    candidates = [
+        Path.home() / ".streamlit" / "secrets.toml",
+        Path(__file__).resolve().parents[2] / ".streamlit" / "secrets.toml",
+    ]
+    return any(path.exists() for path in candidates)
+
+
 def _secret(key: str, section: str = 'supabase') -> str:
     """Read from env first, then fall back to st.secrets[section][key]."""
     val = os.getenv(key, '')
     if val:
         return val
+    if not _secrets_file_exists():
+        return ''
     try:
         return st.secrets[section][key]
     except (KeyError, FileNotFoundError, AttributeError):
@@ -42,6 +54,10 @@ def _missing_config() -> str | None:
     return None
 
 
+def _local_mode() -> bool:
+    return _missing_config() is not None
+
+
 @st.cache_resource
 def get_client() -> Client | None:
     """Cached singleton — preserves PKCE state across Streamlit reruns."""
@@ -59,10 +75,47 @@ def _session_dict(session, user) -> Dict[str, Any]:
     }
 
 
+def _local_user_id(email: str) -> str:
+    return str(uuid5(NAMESPACE_URL, f"ats-score-local-auth:{email.strip().lower()}"))
+
+
+def _local_session(email: str) -> Dict[str, Any]:
+    user_id = _local_user_id(email)
+    payload = {
+        'sub': user_id,
+        'email': email.strip().lower(),
+        'role': 'owner' if email.strip().lower() in _owner_emails() else 'user',
+        'app_metadata': {'provider': 'local'},
+    }
+    access_token = jwt.encode(payload, 'local-dev-secret', algorithm='HS256')
+    refresh_token = f'local-refresh-{user_id}'
+    return {
+        'access_token': access_token,
+        'refresh_token': refresh_token,
+        'user_id': user_id,
+        'email': email.strip().lower(),
+    }
+
+
+def _owner_emails() -> set[str]:
+    emails = set()
+    owner_email = os.getenv("OWNER_EMAIL", "").strip().lower()
+    if owner_email:
+        emails.add(owner_email)
+    extra = os.getenv("OWNER_EMAILS", "")
+    for email in extra.split(","):
+        cleaned = email.strip().lower()
+        if cleaned:
+            emails.add(cleaned)
+    return emails
+
+
 def sign_in_with_password(email: str, password: str) -> Dict[str, Any]:
     err = _missing_config()
     if err:
-        return {'error': err}
+        if not email or not password:
+            return {'error': 'Enter an email and password.'}
+        return _local_session(email)
     try:
         resp = get_client().auth.sign_in_with_password(
             {'email': email, 'password': password}
@@ -78,7 +131,9 @@ def sign_in_with_password(email: str, password: str) -> Dict[str, Any]:
 def sign_up_with_password(email: str, password: str) -> Dict[str, Any]:
     err = _missing_config()
     if err:
-        return {'error': err}
+        if not email or not password:
+            return {'error': 'Enter an email and password.'}
+        return _local_session(email)
     try:
         resp = get_client().auth.sign_up({'email': email, 'password': password})
         if resp.session and resp.user:
@@ -94,7 +149,7 @@ def sign_up_with_password(email: str, password: str) -> Dict[str, Any]:
 def google_oauth_url() -> Dict[str, Any]:
     err = _missing_config()
     if err:
-        return {'error': err}
+        return {'error': 'Google OAuth requires Supabase configuration.'}
     try:
         resp = get_client().auth.sign_in_with_oauth({
             'provider': 'google',

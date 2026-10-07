@@ -1,5 +1,8 @@
 import logging
 from contextlib import asynccontextmanager
+import hashlib
+
+import numpy as np
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 # from backend.api.routes import router
@@ -16,22 +19,61 @@ from backend.api.routes import router
 
 logger=logging.getLogger('ats_resume_scorer')
 
+
+class _FallbackSentenceTransformer:
+    """Offline-safe embedding fallback using deterministic hashed bag-of-words vectors."""
+
+    def __init__(self, dimensions: int = 384):
+        self.dimensions = dimensions
+
+    def encode(self, text, convert_to_tensor=False):
+        if isinstance(text, (list, tuple)):
+            vectors = [self._encode_one(item) for item in text]
+            return np.vstack(vectors)
+        return self._encode_one(text)
+
+    def _encode_one(self, text):
+        vector = np.zeros(self.dimensions, dtype=np.float32)
+        tokens = str(text or "").lower().split()
+        for token in tokens:
+            digest = hashlib.sha1(token.encode("utf-8")).digest()
+            bucket = int.from_bytes(digest[:4], "big") % self.dimensions
+            sign = 1.0 if digest[4] % 2 == 0 else -1.0
+            vector[bucket] += sign
+        norm = np.linalg.norm(vector)
+        if norm:
+            vector /= norm
+        return vector
+
+
 @asynccontextmanager
 async def lifespan(app:FastAPI):
+    app.state.nlp = None
+    app.state.embedder = None
+
     logger.info(f'Loading spaCy NLP model: {SPACY_MODEL_PRIMARY}')
     import spacy
     try:
         app.state.nlp = spacy.load(SPACY_MODEL_PRIMARY)
         logger.info(f'Loaded {SPACY_MODEL_PRIMARY}')
-    except OSError:
+    except Exception:
         logger.warning(f'{SPACY_MODEL_PRIMARY} not found — falling back to {SPACY_MODEL_SECONDARY}')
-        app.state.nlp = spacy.load(SPACY_MODEL_SECONDARY)
-        logger.info(f'Loaded {SPACY_MODEL_SECONDARY} (fallback)')
+        try:
+            app.state.nlp = spacy.load(SPACY_MODEL_SECONDARY)
+            logger.info(f'Loaded {SPACY_MODEL_SECONDARY} (fallback)')
+        except Exception:
+            logger.warning('spaCy models unavailable; using blank English pipeline.')
+            app.state.nlp = spacy.blank('en')
 
     logger.info(f'Loading SentenceTransformer: {SENTENCE_TRANSFORMER_MODEL}')
-    from sentence_transformers import SentenceTransformer
-    app.state.embedder = SentenceTransformer(SENTENCE_TRANSFORMER_MODEL)
-    logger.info(f'Loaded {SENTENCE_TRANSFORMER_MODEL}')
+    try:
+        from sentence_transformers import SentenceTransformer
+
+        app.state.embedder = SentenceTransformer(SENTENCE_TRANSFORMER_MODEL)
+        logger.info(f'Loaded {SENTENCE_TRANSFORMER_MODEL}')
+    except Exception as exc:
+        logger.warning(f'SentenceTransformer unavailable; using offline fallback: {exc}')
+        app.state.embedder = _FallbackSentenceTransformer()
 
     logger.info('All models loaded. API is ready to serve requests.')
 
@@ -68,6 +110,8 @@ async def root():
             'POST   /api/v1/analyze-resume': 'Analyze a resume',
             'GET    /api/v1/history':        'Get user history',
             'DELETE /api/v1/history/:id':    'Delete a history entry',
+            'POST   /api/v1/auth/login-event': 'Record a successful login event',
+            'GET    /api/v1/admin/dashboard':  'Owner-only dashboard data',
             'GET    /api/v1/health':         'Health check',
             'POST   /api/v1/generate-pdf':   'Generate PDF report from data',
         },

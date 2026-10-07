@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+.venv/
+
+# Environment & Secrets
+.env
+.env.local
+.streamlit/secrets.toml
+
+# IDE & OS
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Node & Caches
+.npm-cache/
+.local/
+
+# Logs
+*.log
+backend/logs/*.log
